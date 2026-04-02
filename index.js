@@ -176,7 +176,34 @@ client.on(Events.MessageCreate, async message => {
     return message.reply(` Bot **${saat} saat, ${dakika} dakikadır** kesintisiz çalışıyor.`);
 }
 });
+const { joinVoiceChannel, getVoiceConnection } = require('@discordjs/voice');
 
+// !ses [Kanal_ID]
+if (message.content.toLowerCase().startsWith('!ses ')) {
+    const channelId = message.content.slice(5).trim();
+    const channel = message.guild.channels.cache.get(channelId);
+
+    if (!channel || channel.type !== 2) {
+        return message.reply('❌ Geçerli bir ses kanalı ID’si gir aslanım! (ID kopyalamayı unutma)');
+    }
+
+    joinVoiceChannel({
+        channelId: channel.id,
+        guildId: message.guild.id,
+        adapterCreator: message.guild.voiceAdapterCreator,
+    });
+
+    return message.reply(`✅ **${channel.name}** kanalına iniş yapıldı!`);
+}
+
+// !ses-cik
+if (message.content.toLowerCase() === '!ses-cik') {
+    const connection = getVoiceConnection(message.guild.id);
+    if (connection) {
+        connection.destroy();
+        return message.reply('👋 Ses kanalından ayrıldım.');
+    }
+}
 
 // ─────────────────────────────────────────
 //  Buton + Modal Etkileşimleri
