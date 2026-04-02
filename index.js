@@ -131,26 +131,26 @@ client.on(Events.MessageCreate, async message => {
         return message.reply(`🚀 Bot **${saat} saat, ${dakika} dakikadır** çalışıyor.`);
     }
 
-    // !ses [Kanal_ID]
+// !ses [Kanal_ID] - Güncellenmiş ve Daha Sağlam Versiyon
     if (msg.startsWith('!ses ')) {
         const channelId = message.content.slice(5).trim();
         const channel = message.guild.channels.cache.get(channelId);
-        if (!channel || channel.type !== 2) return message.reply('❌ Geçerli ses kanalı ID gir!');
 
-        joinVoiceChannel({
-            channelId: channel.id,
-            guildId: message.guild.id,
-            adapterCreator: message.guild.voiceAdapterCreator,
-        });
-        return message.reply(`✅ **${channel.name}** kanalına girildi!`);
-    }
+        if (!channel) return message.reply('❌ Kanal bulunamadı! ID doğru mu?');
+        if (channel.type !== 2) return message.reply('❌ Girdiğin ID bir ses kanalına ait değil!');
 
-    // !ses-cik
-    if (msg === '!ses-cik') {
-        const connection = getVoiceConnection(message.guild.id);
-        if (connection) {
-            connection.destroy();
-            return message.reply('👋 Ses kanalından ayrıldım.');
+        try {
+            joinVoiceChannel({
+                channelId: channel.id,
+                guildId: message.guild.id,
+                adapterCreator: message.guild.voiceAdapterCreator,
+                selfDeaf: true, // Botun kendini sağırlaştırması (hata payını azaltır)
+                selfMute: false
+            });
+            return message.reply(`✅ **${channel.name}** kanalına başarıyla giriş yaptım!`);
+        } catch (error) {
+            console.error('Ses Hatası:', error);
+            return message.reply('❌ Ses kanalına bağlanırken teknik bir hata oluştu.');
         }
     }
 });
